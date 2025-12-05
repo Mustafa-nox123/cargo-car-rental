@@ -5,25 +5,32 @@ Team Members
 Abdul Moid Ghori (ERP: 29220)
 Rayyan Jan (ERP: 29200)
 Mustafa Ghani (ERP: 29281)
-Features
-Customer Features
-User registration and authentication
-Browse available cars by date, category, and branch
-Real-time car availability checking
-Book cars with pickup/return dates
-Multiple payment options (Card/Cash)
-View booking history
-Download/Print receipts
-System Features
-Single-day and multi-day rental support
-Operating hours: 8:00 AM - 11:00 PM
-Automatic pricing calculation
-Security deposit management
-Tax calculation (15%)
-JWT-based authentication
-Password encryption
-Technology Stack
-Backend
+
+
+Features:
+
+->Customer Features
+
+1. User registration and authentication
+2. Browse available cars by date, category, and branch
+3. Real-time car availability checking
+4. Book cars with pickup/return dates
+5. Multiple payment options (Card/Cash)
+6. View booking history
+7. Download/Print receipts
+   
+->  System Features
+1. Single-day and multi-day rental support
+2. Operating hours: 8:00 AM - 11:00 PM
+3. Automatic pricing calculation
+4. Security deposit management
+5. Tax calculation (15%)
+6. JWT-based authentication
+7. Password encryption
+8. Technology Stack
+
+   
+-> Backend
 Node.js - Runtime environment
 Express.js - Web framework
 Oracle Database - Database system
@@ -32,17 +39,22 @@ bcryptjs - Password hashing
 jsonwebtoken - JWT authentication
 cors - Cross-origin resource sharing
 dotenv - Environment variable management
+
+
 Frontend
 HTML5 - Structure
 CSS3 - Styling with gradients and animations
 Vanilla JavaScript - Interactivity and API calls
-Prerequisites
-Before running this project, make sure you have:
 
-Node.js (v14 or higher) installed
-Oracle Database (11g or higher) or Oracle Express Edition (XE)
-Oracle Instant Client installed and configured
-Database tables created (use the DDL scripts from your team)
+
+Prerequisites
+Before running this project, **make sure** you have:
+
+- Node.js (v14 or higher) installed
+- Oracle Database (11g or higher) or Oracle Express Edition (XE)
+- Oracle Instant Client installed and configured
+- Database tables created (use the DDL scripts from your team)
+  
 Installation
 Clone or extract the project
 bash
@@ -50,10 +62,14 @@ bash
 Install dependencies
 bash
    npm install
+
 Configure Oracle Instant Client
+
 Download Oracle Instant Client from Oracle's website
+
 Extract it to a directory
 Set environment variables:
+
 Windows:
 cmd
    set PATH=C:\path\to\instantclient;%PATH%
@@ -61,10 +77,12 @@ Mac/Linux:
 
 bash
    export LD_LIBRARY_PATH=/path/to/instantclient:$LD_LIBRARY_PATH
+
 Configure Database Connection Edit the .env file with your Oracle database credentials:
    DB_USER=your_username
    DB_PASSWORD=your_password
    DB_CONNECT_STRING=localhost:1521/XEPDB1
+
 Create Database Tables Run the DDL scripts provided by your database team to create:
 Customer
 Branch
@@ -77,12 +95,15 @@ Inspection
 Payment
 ExtraCharge
 Maintenance
+
+
 Insert Sample Data Insert at least:
 2-3 branches
 3-4 categories (Economy, SUV, Luxury)
 10+ cars
 Rate plans for each category
-Running the Application
+
+-> Running the Application
 Start the server
 bash
    npm start
@@ -90,9 +111,12 @@ For development with auto-restart:
 
 bash
    npm run dev
-Access the application Open your browser and navigate to:
+
+->Access the application Open your browser and navigate to:
+
    http://localhost:3000
-Database Schema
+
+-> Database Schema
 Key Tables
 Customer
 
@@ -123,32 +147,42 @@ payment_id (PK)
 res_id (FK → Reservation)
 amount, currency, method
 paid_at, purpose, txn_ref
-API Endpoints
-Authentication
-POST /api/auth/register - Register new user
-POST /api/auth/login - User login
-Cars
+
+
+->API Endpoints
+
+1. Authentication
+- POST /api/auth/register - Register new user
+- POST /api/auth/login - User login
+
+2. Cars
 GET /api/cars/available - Get available cars (with filters)
 GET /api/categories - Get all categories
 GET /api/branches - Get all branches
-Reservations
+
+3. Reservations
 POST /api/reservations - Create new reservation (requires auth)
 GET /api/reservations/my - Get user's reservations (requires auth)
-Payments
+
+4. Payments
 POST /api/payments - Record payment (requires auth)
-Rate Plans
+
+5. Rate Plans
 GET /api/rateplan - Get pricing for category
-Business Rules Implementation
-Operating Hours: 8:00 AM - 11:00 PM (enforced in frontend)
-Single-day Rentals: Must start and end same day
-Multi-day Rentals: Can span multiple days
-Pricing:
+
+6. Business Rules Implementation
+- Operating Hours: 8:00 AM - 11:00 PM (enforced in frontend)
+- Single-day Rentals: Must start and end same day
+- Multi-day Rentals: Can span multiple days
+  
+7. Pricing:
 Single day: PKR 5,000 base
 Multi-day: PKR 4,500 per day
 Deposit: PKR 10,000
 Tax: 15%
 Availability: Checks for overlapping reservations
-Deployment to Vercel
+
+8. Deployment to Vercel
 Install Vercel CLI
 bash
    npm install -g vercel
@@ -168,7 +202,8 @@ Note: Vercel is primarily for static/serverless deployments. For Oracle database
 Using Heroku or Railway
 Switching to PostgreSQL/MySQL (requires approval)
 Deploying backend separately on a VPS
-Project Structure
+
+-> Project Structure
 cargo-car-rental/
 ├── server.js           # Main Express server
 ├── package.json        # Dependencies
@@ -271,4 +306,5 @@ MIT License - Free to use for educational purposes
 Course: CS 341 Database Systems
 Instructors: Abeera Tariq / Maria Rahim
 Fall 2025
+
 
