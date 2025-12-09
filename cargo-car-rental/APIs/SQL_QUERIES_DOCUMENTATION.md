@@ -1,501 +1,425 @@
-CarGo - SQL Queries Documentation
-This document details all SQL queries used in the CarGo application, explaining their purpose and how they contribute to functionality.
-
-Table of Contents
-
-Authentication Queries
-Car Management Queries
-Reservation Queries
-Payment Queries
-Reference Data Queries
-Stored Procedures
-Triggers
-
-
-Authentication Queries
-1. User Registration
-Purpose: Insert new customer into the database with hashed password
-Query:
-sqlINSERT INTO Customer (name, email, password, phone, license_no, license_expiry, address) 
-VALUES (:name, :email, :password, :phone, :license_no, 
-        TO_DATE(:license_expiry, 'YYYY-MM-DD'), :address)
-RETURNING customer_id INTO :id
-Parameters:
-
-:name - Customer's full name
-:email - Customer's email address (unique)
-:password - Hashed password using bcrypt
-:phone - Contact phone number
-:license_no - Driver's license number
-:license_expiry - License expiration date
-:address - Customer's address
-
-Returns: New customer_id
-How it contributes:
-
-Creates user account in the system
-Validates email uniqueness through database constraint
-Ensures all required customer information is captured before booking
-
-
-2. Check Existing User
-Purpose: Verify if email already exists to prevent duplicate accounts
-Query:
-sqlSELECT customer_id FROM Customer WHERE email = :email
-Parameters:
-
-:email - Email to check
-
-Returns: customer_id if exists, empty result otherwise
-How it contributes:
-
-Prevents duplicate registrations
-Provides user-friendly error messages
-Maintains data integrity
-
-
-3. User Login
-Purpose: Authenticate user and retrieve account details
-Query:
-sqlSELECT customer_id, name, email, password 
-FROM Customer 
-WHERE email = :email
-Parameters:
-
-:email - User's email
-
-Returns: User details including hashed password for verification
-How it contributes:
-
-Authenticates users securely
-Password verified in application layer (not in SQL)
-Retrieves user info for session management
-
-
-Car Management Queries
-4. Get Available Cars with Filters
-Purpose: Retrieve cars available for rent based on search criteria
-Query:
-sqlSELECT c.car_id, c.reg_no, c.make, c.model, c.year, c.vin, 
-       cat.name as category_name, cat.description as category_desc,
-       b.name as branch_name, b.city, c.status
-FROM Car c
-JOIN Category cat ON c.category_id = cat.category_id
-JOIN Branch b ON c.branch_id = b.branch_id
-WHERE c.status = 'Available'
-  AND c.category_id = :category_id  -- Optional filter
-  AND c.branch_id = :branch_id      -- Optional filter
-  AND c.car_id NOT IN (
-    SELECT r.car_id FROM Reservation r
-    WHERE r.status IN ('Booked', 'CheckedOut')
-    AND (
-      (TO_DATE(:start_date, 'YYYY-MM-DD') BETWEEN r.start_dt AND r.end_dt)
-      OR (TO_DATE(:end_date, 'YYYY-MM-DD') BETWEEN r.start_dt AND r.end_dt)
-      OR (r.start_dt BETWEEN TO_DATE(:start_date, 'YYYY-MM-DD') 
-                         AND TO_DATE(:end_date, 'YYYY-MM-DD'))
-    )
-  )
-Parameters:
-
-:start_date - Desired pickup date
-:end_date - Desired return date
-:category_id - Optional category filter
-:branch_id - Optional branch filter
-
-Returns: List of available cars with full details
-How it contributes:
-
-Core functionality for browsing cars
-Real-time availability checking
-Prevents double-booking
-Supports flexible filtering by category, branch, and dates
-Uses subquery to exclude cars with overlapping reservations
-
-
-5. Get All Categories
-Purpose: Retrieve all car categories for filtering
-Query:
-sqlSELECT category_id, name, description 
-FROM Category
-Returns: All categories (Economy, SUV, Luxury)
-How it contributes:
-
-Populates category dropdown in search
-Enables category-based filtering
-Shows descriptions to help users choose
-
-
-6. Get All Branches
-Purpose: Retrieve all branch locations
-Query:
-sqlSELECT branch_id, name, city, address 
-FROM Branch
-Returns: All branch locations
-How it contributes:
-
-Populates branch dropdowns (pickup/return)
-Allows location-based searching
-Shows available locations to customers
-
-
-Reservation Queries
-7. Check Car Availability for Specific Dates
-Purpose: Verify if a specific car is available before creating reservation
-Query:
-sqlSELECT car_id 
-FROM Reservation 
-WHERE car_id = :car_id 
-  AND status IN ('Booked', 'CheckedOut')
-  AND (
-    (TO_DATE(:start_dt, 'YYYY-MM-DD HH24:MI:SS') BETWEEN start_dt AND end_dt)
-    OR (TO_DATE(:end_dt, 'YYYY-MM-DD HH24:MI:SS') BETWEEN start_dt AND end_dt)
-  )
-Parameters:
-
-:car_id - Specific car to check
-:start_dt - Proposed start date/time
-:end_dt - Proposed end date/time
-
-Returns: car_id if unavailable, empty if available
-How it contributes:
-
-Double-checks availability before booking
-Prevents race conditions (two users booking same car simultaneously)
-Ensures data integrity
-
-
-8. Create Reservation
-Purpose: Insert new reservation into database
-Query:
-sqlINSERT INTO Reservation (customer_id, car_id, pickup_branch_id, return_branch_id, 
-                         start_dt, end_dt, is_single_day, status)
-VALUES (:customer_id, :car_id, :pickup_branch_id, :return_branch_id,
-        TO_DATE(:start_dt, 'YYYY-MM-DD HH24:MI:SS'), 
-        TO_DATE(:end_dt, 'YYYY-MM-DD HH24:MI:SS'),
-        :is_single_day, 'Booked')
-RETURNING res_id INTO :res_id
-Parameters:
-
-:customer_id - Customer making reservation
-:car_id - Selected car
-:pickup_branch_id - Where to pick up
-:return_branch_id - Where to return
-:start_dt - Pickup date and time
-:end_dt - Return date and time
-:is_single_day - Boolean flag (1 or 0)
-
-Returns: New reservation ID
-How it contributes:
-
-Core booking functionality
-Records all reservation details
-Links customer, car, and branches
-Distinguishes single-day vs multi-day rentals
-Initial status set to 'Booked'
-
-
-9. Get User's Reservations
-Purpose: Retrieve all reservations for logged-in customer
-Query:
-sqlSELECT r.res_id, r.start_dt, r.end_dt, r.status, r.is_single_day,
-       c.make, c.model, c.reg_no,
-       pb.name as pickup_branch, rb.name as return_branch
-FROM Reservation r
-JOIN Car c ON r.car_id = c.car_id
-JOIN Branch pb ON r.pickup_branch_id = pb.branch_id
-JOIN Branch rb ON r.return_branch_id = rb.branch_id
-WHERE r.customer_id = :customer_id
-ORDER BY r.start_dt DESC
-Parameters:
-
-:customer_id - Current user's ID
-
-Returns: All reservations with car and branch details
-How it contributes:
-
-Shows booking history to customers
-Displays status of each reservation
-Orders by most recent first
-Joins multiple tables for complete information
-Enables customers to track their rentals
-
-
-Payment Queries
-10. Record Payment
-Purpose: Insert payment record linked to reservation
-Query:
-sqlINSERT INTO Payment (res_id, amount, currency, method, purpose, txn_ref)
-VALUES (:res_id, :amount, :currency, :method, :purpose, :txn_ref)
-RETURNING payment_id INTO :payment_id
-Parameters:
-
-:res_id - Related reservation
-:amount - Payment amount
-:currency - PKR (default)
-:method - 'card' or 'cash'
-:purpose - 'deposit', 'advance', or 'final'
-:txn_ref - Transaction reference (generated)
-
-Returns: New payment ID
-How it contributes:
-
-Records financial transactions
-Links payments to reservations
-Supports multiple payment methods
-Tracks different payment purposes (deposit, advance, final)
-Generates unique transaction references for audit trail
-
-
-Reference Data Queries
-11. Get Rate Plan for Pricing
-Purpose: Retrieve pricing information for category and day type
-Query:
-sqlSELECT base_daily_rate, single_day_base_rate, extra_hour_rate, deposit_amount
-FROM RatePlan
-WHERE category_id = :category_id
-  AND day_type = :day_type
-  AND SYSDATE BETWEEN effective_from AND effective_to
-Parameters:
-
-:category_id - Car category (Economy, SUV, Luxury)
-:day_type - 'weekday', 'weekend', or 'holiday'
-
-Returns: Rate plan details for pricing calculation
-How it contributes:
-
-Enables dynamic pricing based on category and day type
-Supports time-based rate plans (effective dates)
-Provides all components for cost calculation
-Allows business to adjust rates without code changes
-
-
-Stored Procedures
-12. Calculate Booking Cost (Example Procedure)
-Purpose: Calculate total booking cost including all charges
-Procedure:
-sqlCREATE OR REPLACE PROCEDURE calculate_booking_cost(
-    p_res_id IN NUMBER,
-    p_total_cost OUT NUMBER
-) AS
-    v_start_dt DATE;
-    v_end_dt DATE;
-    v_category_id NUMBER;
-    v_is_single_day NUMBER;
-    v_base_rate NUMBER;
-    v_deposit NUMBER;
-    v_days NUMBER;
-BEGIN
-    -- Get reservation details
-    SELECT r.start_dt, r.end_dt, c.category_id, r.is_single_day
-    INTO v_start_dt, v_end_dt, v_category_id, v_is_single_day
-    FROM Reservation r
-    JOIN Car c ON r.car_id = c.car_id
-    WHERE r.res_id = p_res_id;
-    
-    -- Calculate days
-    v_days := CEIL(v_end_dt - v_start_dt);
-    IF v_days = 0 THEN v_days := 1; END IF;
-    
-    -- Get rate plan
-    SELECT DECODE(v_is_single_day, 1, single_day_base_rate, base_daily_rate * v_days),
-           deposit_amount
-    INTO v_base_rate, v_deposit
-    FROM RatePlan
-    WHERE category_id = v_category_id
-      AND day_type = 'weekday'  -- Simplified
-      AND SYSDATE BETWEEN effective_from AND effective_to;
-    
-    -- Calculate total (base + deposit + 15% tax)
-    p_total_cost := (v_base_rate + v_deposit) * 1.15;
-    
-END;
-/
-How it contributes:
-
-Encapsulates complex pricing logic
-Ensures consistent cost calculation
-Can be called from application or other procedures
-Handles single-day vs multi-day pricing
-Applies tax automatically
-
-
-Triggers
-13. Update Car Status on Reservation (Example Trigger)
-Purpose: Automatically update car status when reservation status changes
-Trigger:
-sqlCREATE OR REPLACE TRIGGER trg_update_car_status
-AFTER UPDATE OF status ON Reservation
-FOR EACH ROW
-BEGIN
-    -- When reservation is checked out
-    IF :NEW.status = 'CheckedOut' AND :OLD.status = 'Booked' THEN
-        UPDATE Car 
-        SET status = 'Rented' 
-        WHERE car_id = :NEW.car_id;
-    END IF;
-    
-    -- When rental is completed
-    IF :NEW.status = 'Completed' AND :OLD.status = 'CheckedOut' THEN
-        UPDATE Car 
-        SET status = 'Available' 
-        WHERE car_id = :NEW.car_id;
-    END IF;
-    
-    -- When reservation is cancelled
-    IF :NEW.status = 'Cancelled' THEN
-        UPDATE Car 
-        SET status = 'Available' 
-        WHERE car_id = :NEW.car_id;
-    END IF;
-END;
-/
-How it contributes:
-
-Maintains car status automatically
-Ensures consistency between Reservation and Car tables
-Reduces application logic
-Prevents manual errors
-Supports business workflow (Booked → CheckedOut → Completed)
-
-
-14. Audit Trail Trigger (Example)
-Purpose: Log all changes to reservations for audit
-Trigger:
-sqlCREATE OR REPLACE TRIGGER trg_reservation_audit
-AFTER INSERT OR UPDATE OR DELETE ON Reservation
-FOR EACH ROW
-DECLARE
-    v_action VARCHAR2(10);
-BEGIN
-    IF INSERTING THEN v_action := 'INSERT';
-    ELSIF UPDATING THEN v_action := 'UPDATE';
-    ELSIF DELETING THEN v_action := 'DELETE';
-    END IF;
-    
-    INSERT INTO Audit_Log (
-        table_name, action, record_id, 
-        old_status, new_status, changed_by, changed_at
-    ) VALUES (
-        'Reservation', v_action, 
-        COALESCE(:NEW.res_id, :OLD.res_id),
-        :OLD.status, :NEW.status,
-        USER, SYSDATE
-    );
-END;
-/
-How it contributes:
-
-Tracks all reservation changes
-Provides audit trail for compliance
-Records who made changes and when
-Helps debug issues
-Supports business reporting
-
-
-Query Performance Optimization
-Indexes Used
-sql-- Speed up car searches
-CREATE INDEX idx_car_status ON Car(status);
-CREATE INDEX idx_car_category ON Car(category_id);
-CREATE INDEX idx_car_branch ON Car(branch_id);
-
--- Speed up reservation lookups
-CREATE INDEX idx_reservation_customer ON Reservation(customer_id);
-CREATE INDEX idx_reservation_car ON Reservation(car_id);
-CREATE INDEX idx_reservation_dates ON Reservation(start_dt, end_dt);
-CREATE INDEX idx_reservation_status ON Reservation(status);
-
--- Speed up payment queries
-CREATE INDEX idx_payment_reservation ON Payment(res_id);
-How they contribute:
-
-Dramatically speed up search queries
-Optimize JOIN operations
-Enable efficient date range queries
-Improve WHERE clause performance
-
-
-Views (Optional)
-Available Cars View
-sqlCREATE OR REPLACE VIEW vw_available_cars AS
-SELECT c.car_id, c.reg_no, c.make, c.model, c.year,
-       cat.name as category_name,
-       b.name as branch_name, b.city
-FROM Car c
-JOIN Category cat ON c.category_id = cat.category_id
-JOIN Branch b ON c.branch_id = b.branch_id
-WHERE c.status = 'Available'
-  AND c.car_id NOT IN (
-      SELECT car_id FROM Reservation 
-      WHERE status IN ('Booked', 'CheckedOut')
-      AND SYSDATE BETWEEN start_dt AND end_dt
+
+# **Table of Contents**
+
+1. Authentication Queries
+2. Branch & Vehicle Reference Queries
+3. Reservation Queries
+4. Rental Queries
+5. Payment Queries
+6. Maintenance Queries
+7. Stored Procedures
+8. Functions
+9. Triggers
+10. Indexing Strategy
+11. Views (Optional)
+12. Summary of SQL Patterns
+
+---
+
+# **1. Authentication Queries**
+
+## **1.1 User Registration**
+
+**Purpose:** Create a new customer account in the system.
+
+```sql
+INSERT INTO customer (
+   first_name, last_name, email, password,
+   phone_no, license_no, license_expiry, address, national_id
+)
+VALUES (
+   :first_name, :last_name, :email, :password,
+   :phone_no, :license_no,
+   TO_DATE(:license_expiry, 'YYYY-MM-DD'),
+   :address, :national_id
+)
+RETURNING customer_id INTO :id;
+```
+
+### **Parameters**
+
+* `:first_name, :last_name` — Customer name split for storage
+* `:email` — Unique email identifier
+* `:password` — Bcrypt-hashed password
+* `:license_no`, `:license_expiry` — Required for renting vehicles
+* `:address`, `:national_id` — Additional ID details
+
+### **How it contributes**
+
+* Creates customer identity for login and reservations
+* Ensures license verification before rentals
+* Enforces unique email via database constraint
+
+---
+
+## **1.2 Check Existing User**
+
+```sql
+SELECT customer_id 
+FROM customer 
+WHERE email = :email;
+```
+
+### **Purpose**
+
+* Prevent duplicate registrations
+* Speed up login lookup
+
+### **Returns**
+
+* `customer_id` if email exists
+* Empty result if not
+
+---
+
+## **1.3 Login Query**
+
+```sql
+SELECT customer_id, first_name, last_name, email, password
+FROM customer
+WHERE email = :email;
+```
+
+### **How it contributes**
+
+* Retrieves hashed password for verification
+* Fetches user identity for token generation
+
+---
+
+# **2. Branch & Vehicle Reference Queries**
+
+## **2.1 Get All Branches**
+
+```sql
+SELECT branch_id, branch_name, city, address_line, phone_no
+FROM branch
+ORDER BY city, branch_name;
+```
+
+### **Purpose**
+
+* Populate pickup/drop-off lists
+* Show all service locations
+
+---
+
+## **2.2 Get Vehicle Types**
+
+```sql
+SELECT vehicle_type_id, type_name, daily_rate, description
+FROM vehicle_type
+ORDER BY daily_rate;
+```
+
+### **Purpose**
+
+* Display categories (Economy, SUV, Luxury)
+* Used in pricing and vehicle filtering
+
+---
+
+# **3. Vehicle Availability Queries**
+
+## **3.1 Check Available Vehicles**
+
+```sql
+SELECT v.vehicle_id,
+       v.registration_no,
+       v.make,
+       v.model,
+       v.year_made,
+       vt.type_name,
+       vt.description,
+       vt.daily_rate,
+       b.branch_name,
+       b.city,
+       v.status
+FROM vehicle v
+JOIN vehicle_type vt ON vt.vehicle_type_id = v.vehicle_type_id
+JOIN branch b ON b.branch_id = v.branch_id
+WHERE v.status = 'AVAILABLE'
+  AND (:vehicle_type_id IS NULL OR v.vehicle_type_id = :vehicle_type_id)
+  AND (:branch_id IS NULL OR v.branch_id = :branch_id)
+  AND v.vehicle_id NOT IN (
+        SELECT r.vehicle_id
+        FROM reservation r
+        WHERE r.status IN ('BOOKED','CONVERTED')
+          AND ( r.start_date <= TO_DATE(:end_date, 'YYYY-MM-DD')
+            AND r.end_date   >= TO_DATE(:start_date, 'YYYY-MM-DD'))
   );
-Usage:
-sqlSELECT * FROM vw_available_cars;
-How it contributes:
+```
 
-Simplifies complex queries
-Provides reusable abstraction
-Maintains consistent business logic
-Can be used by multiple parts of application
+### **Purpose**
 
+* Real-time check of which vehicles can be rented
+* Prevents double-booking
+* Supports filtering by type + branch + date
 
-Summary of Query Patterns
-Pattern 1: Parameterized Queries
-All queries use bind parameters (:param_name) to prevent SQL injection
-Pattern 2: Date Handling
-Consistent use of TO_DATE() function with format strings
-Pattern 3: Joins
-Extensive use of INNER JOIN to combine related data
-Pattern 4: Subqueries
-Used for availability checking (NOT IN with subquery)
-Pattern 5: Aggregate Functions
-Used in reporting and calculations (COUNT, SUM, etc.)
-Pattern 6: Transaction Management
-Explicit commits in Node.js: { autoCommit: true }
+---
 
-Security Considerations
+# **4. Reservation Queries**
 
-SQL Injection Prevention:
+## **4.1 Check Car Availability (specific vehicle)**
 
-All queries use bind parameters
-No string concatenation with user input
+```sql
+SELECT reservation_id
+FROM reservation
+WHERE vehicle_id = :vehicle_id
+  AND status IN ('BOOKED','CONVERTED')
+  AND (
+        start_date <= TO_DATE(:end_date, 'YYYY-MM-DD')
+    AND end_date   >= TO_DATE(:start_date, 'YYYY-MM-DD')
+  );
+```
 
+### **Purpose**
 
-Password Security:
+* Ensures the selected vehicle is not already rented
+* Prevents overlapping bookings
 
-Passwords hashed with bcrypt before storage
-Never stored in plain text
+---
 
+## **4.2 Create Reservation**
 
-Authorization:
+```sql
+INSERT INTO reservation (
+   customer_id, vehicle_id, pickup_branch_id, dropoff_branch_id,
+   start_date, end_date, status
+)
+VALUES (
+   :customer_id, :vehicle_id, :pickup_branch_id, :dropoff_branch_id,
+   TO_DATE(:start_date, 'YYYY-MM-DD'),
+   TO_DATE(:end_date, 'YYYY-MM-DD'),
+   'BOOKED'
+)
+RETURNING reservation_id INTO :res_id;
+```
 
-Customer can only view their own reservations
-Queries filtered by customer_id from JWT token
+### **Purpose**
 
+* Records customer intent to rent
+* Used later to generate a rental
 
-Data Validation:
+---
 
-Database constraints enforce data integrity
-Foreign keys prevent orphaned records
+## **4.3 Get Customer’s Reservations**
 
+```sql
+SELECT r.reservation_id,
+       r.start_date,
+       r.end_date,
+       r.status,
+       v.make,
+       v.model,
+       v.registration_no,
+       pb.branch_name AS pickup_branch,
+       db.branch_name AS dropoff_branch
+FROM reservation r
+JOIN vehicle v ON r.vehicle_id = v.vehicle_id
+JOIN branch pb ON r.pickup_branch_id = pb.branch_id
+JOIN branch db ON r.dropoff_branch_id = db.branch_id
+WHERE r.customer_id = :customer_id
+ORDER BY r.start_date DESC;
+```
 
+### **Purpose**
 
+* Displays booking history in the user dashboard
 
-Total Queries Used: 14+
-This application demonstrates comprehensive use of:
+---
 
-✅ SELECT queries (data retrieval)
-✅ INSERT queries (data creation)
-✅ UPDATE queries (data modification)
-✅ DELETE queries (data removal - through triggers/procedures)
-✅ Complex JOINs (multiple tables)
-✅ Subqueries (nested queries)
-✅ Aggregate functions
-✅ Date/Time functions
-✅ Stored procedures
-✅ Triggers
-✅ Indexes for performance
-✅ Views for abstraction
+# **5. Rental Queries**
 
-All queries work together to provide a complete OLTP system for car rental management.
+## **5.1 Rental Creation (within procedure START_RENTAL)**
+
+```sql
+INSERT INTO rental (
+   reservation_id, customer_id, vehicle_id,
+   pickup_datetime, dropoff_datetime,
+   pickup_branch_id, dropoff_branch_id,
+   total_amount, status
+)
+VALUES (
+   p_reservation_id, v_customer_id, v_vehicle_id,
+   NVL(p_pickup_date, SYSDATE), NULL,
+   v_pickup_branch, v_dropoff_branch,
+   NULL, 'OPEN'
+)
+RETURNING rental_id INTO p_rental_id;
+```
+
+### **Purpose**
+
+* Converts a reservation into an active rental
+* Sets pickup timestamp
+* Vehicle status becomes RENTED via trigger
+
+---
+
+# **6. Payment Queries**
+
+## **6.1 Make Payment (Simplified, actual logic inside `MAKE_PAYMENT`)**
+
+```sql
+INSERT INTO payment (
+   payment_id, rental_id, payment_date, amount, method, remarks
+)
+VALUES (
+   payment_seq.NEXTVAL, :rental_id, SYSDATE, :amount, :method, :remarks
+);
+```
+
+### **Purpose**
+
+* Records payments during or after rental
+* Supports multiple payment events per rental
+
+---
+
+# **7. Maintenance Queries**
+
+## **7.1 Insert Maintenance Record**
+
+```sql
+INSERT INTO maintenance (
+   maintenance_id, vehicle_id, start_date, end_date, description, cost
+)
+VALUES (
+   maintenance_seq.NEXTVAL, :vehicle_id, :start_date, :end_date, :description, :cost
+);
+```
+
+### **Contribution**
+
+* Logs mechanical servicing
+* Triggers automatically update vehicle status
+
+---
+
+# **8. Stored Procedures**
+
+## **8.1 START_RENTAL Procedure**
+
+**Purpose:** Convert reservation → active rental.
+
+### **Key Operations**
+
+* Validate reservation
+* Validate vehicle availability
+* Insert rental
+* Update reservation to "CONVERTED"
+* Update vehicle to "RENTED"
+
+### **Contribution**
+
+* Central business workflow
+* Ensures clean transition from booking to rental
+
+---
+
+## **8.2 CLOSE_RENTAL Procedure**
+
+**Purpose:** Complete rental & compute charges.
+
+### **Key Steps**
+
+* Lock rental record
+* Calculate amount using `COMPUTE_RENTAL_AMOUNT`
+* Update rental row
+* Move vehicle to dropoff branch
+* Set vehicle status back to AVAILABLE
+
+---
+
+## **8.3 MAKE_PAYMENT Procedure**
+
+**Purpose:** Insert payment entry for a rental.
+
+---
+
+# **9. Functions**
+
+## **9.1 CALC_BILLABLE_DAYS**
+
+```sql
+RETURN CEIL(p_end_date - p_start_date);
+```
+
+* Ensures minimum 1 day billing
+* Rounds partial days upward
+
+---
+
+## **9.2 COMPUTE_RENTAL_AMOUNT**
+
+```sql
+total_amount := v_daily_rate * v_days;
+```
+
+* Fetches rate from vehicle type
+* Uses CALC_BILLABLE_DAYS
+* Computes total rental cost
+
+---
+
+# **10. Triggers**
+
+## **10.1 TRG_RENTAL_AI – After Insert Rental**
+
+* Vehicle status → RENTED
+* Reservation → CONVERTED
+
+---
+
+## **10.2 TRG_RENTAL_AU_CLOSE – After Rental Closed**
+
+* Vehicle status → AVAILABLE
+* Vehicle moves branch
+
+---
+
+## **10.3 TRG_MAINT_AI – After Maintenance Insert**
+
+* Vehicle status → MAINTENANCE
+
+---
+
+## **10.4 TRG_MAINT_AU – After Maintenance Update**
+
+* When end_date filled → AVAILABLE
+
+---
+
+# **11. Indexing Strategy**
+
+```sql
+CREATE INDEX idx_vehicle_status ON vehicle(status);
+CREATE INDEX idx_vehicle_branch ON vehicle(branch_id);
+CREATE INDEX idx_reservation_vehicle ON reservation(vehicle_id);
+CREATE INDEX idx_reservation_dates ON reservation(start_date, end_date);
+CREATE INDEX idx_rental_customer ON rental(customer_id);
+CREATE INDEX idx_payment_rental ON payment(rental_id);
+```
+
+### **Contribution**
+
+* Fast availability checking
+* Faster reservation lookup
+* Efficient join performance
+
+---
+
+# **12. Summary of SQL Usage Patterns**
+
+| Pattern         | Use Case                                 |
+| --------------- | ---------------------------------------- |
+| Bind parameters | Prevent SQL injection                    |
+| JOINs           | Combine vehicle, branch, customer data   |
+| Subqueries      | Detect reservation overlaps              |
+| Triggers        | Automate status updates                  |
+| Procedures      | Control business logic (rental workflow) |
+| Functions       | Reusable billing logic                   |
+| Indexes         | Performance optimization                 |
+
+---

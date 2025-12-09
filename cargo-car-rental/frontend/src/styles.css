@@ -1,0 +1,26 @@
+/* Global component styles to complement index.css utilities */
+
+.btn { display:inline-block; padding:0.5rem 1rem; border-radius:6px; cursor:pointer; }
+.btn-primary { background:#2563eb; color:#fff; border:none }
+.btn-danger { background:#dc2626; color:#fff; border:none }
+
+.card { background:#fff; border:1px solid #e6e6e6; padding:1rem; border-radius:8px }
+
+.lead { color:#6b7280 }
+
+.form-label { display:block; font-size:0.875rem; margin-bottom:0.25rem; color:#374151 }
+
+/* Avatar / dropdown */
+.avatar-btn { display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:9999px; background:#eef2ff; color:#1e3a8a; font-weight:600; cursor:pointer; border:1px solid rgba(0,0,0,0.04) }
+.avatar-btn.small { width:28px; height:28px; font-size:0.85rem }
+.dropdown { position:relative }
+.dropdown-menu { position:absolute; right:0; top:44px; background:#fff; border:1px solid #e6e6e6; box-shadow:0 8px 24px rgba(15,23,42,0.08); border-radius:8px; min-width:160px; z-index:50; overflow:hidden }
+.dropdown-menu a, .dropdown-menu button { display:block; width:100%; padding:0.5rem 0.75rem; text-align:left; background:transparent; border:none; cursor:pointer; color:#374151 }
+.dropdown-menu a:hover, .dropdown-menu button:hover { background:#fbfbfb }
+
+/* Welcome banner */
+.welcome-banner { background:#ecfdf5; border:1px solid #bbf7d0; padding:12px; border-radius:10px; margin-bottom:12px; display:flex; gap:12px; align-items:center }
+.welcome-avatar { width:48px; height:48px; border-radius:9999px; background:#bbf7d0; display:inline-flex; align-items:center; justify-content:center; color:#065f46; font-weight:700 }
+.welcome-content { line-height:1 }
+.welcome-title { font-size:16px; font-weight:600; color:#064e3b }
+.welcome-sub { color:#065f46 }
