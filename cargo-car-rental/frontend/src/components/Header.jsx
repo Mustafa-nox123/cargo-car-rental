@@ -102,7 +102,9 @@ export default function Header(){
   return (
     <header style={{background:'#fff', borderBottom:'1px solid #e6e6e6'}}>
       <div style={{maxWidth:1024, margin:'0 auto', padding:'1rem', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-        <Link to="/" style={{fontWeight:700, color:'#111827'}}>CarGo</Link>
+        <Link to="/" style={{display:'flex', alignItems:'center'}}>
+          <img src="/logo.png" alt="CarGo" style={{height:40, width:'auto'}} />
+        </Link>
         <nav style={{display:'flex', gap:12, alignItems:'center'}}>
           <Link to="/branches" style={{fontSize:14, color:'#374151'}}>Branches</Link>
           <Link to="/vehicles" style={{fontSize:14, color:'#374151'}}>Vehicles</Link>

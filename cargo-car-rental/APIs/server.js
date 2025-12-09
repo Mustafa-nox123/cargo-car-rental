@@ -412,6 +412,64 @@ app.get('/api/vehicles/available', async (req, res) => {
   }
 });
 
+// Get single vehicle by ID
+app.get('/api/vehicles/:id', async (req, res) => {
+  let connection;
+  try {
+    const vehicleId = Number(req.params.id);
+    connection = await oracledb.getConnection();
+
+    const result = await connection.execute(
+      `SELECT v.vehicle_id,
+              v.registration_no,
+              v.make,
+              v.model,
+              v.year_made,
+              v.image_url,
+              vt.type_name,
+              vt.description,
+              vt.daily_rate,
+              b.branch_id,
+              b.branch_name,
+              b.city,
+              v.status
+         FROM vehicle v
+         JOIN vehicle_type vt ON vt.vehicle_type_id = v.vehicle_type_id
+         JOIN branch b ON b.branch_id = v.branch_id
+        WHERE v.vehicle_id = :vehicle_id`,
+      { vehicle_id: vehicleId }
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Vehicle not found' });
+    }
+
+    const r = result.rows[0];
+    const vehicle = {
+      vehicle_id: r[0],
+      registration_no: r[1],
+      make: r[2],
+      model: r[3],
+      year_made: r[4],
+      image_url: r[5],
+      type_name: r[6],
+      type_description: r[7],
+      daily_rate: r[8],
+      branch_id: r[9],
+      branch_name: r[10],
+      city: r[11],
+      status: r[12]
+    };
+
+    res.json(vehicle);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to fetch vehicle', details: err.message });
+  } finally {
+    if (connection) await connection.close();
+  }
+});
+
 
 // ============= RESERVATION ROUTES =============
 
@@ -1009,3 +1067,86 @@ app.delete('/api/vehicles/:id/images/:filename', verifyAdmin, async (req, res) =
     res.status(500).json({ error: 'Failed to delete', details: err.message })
   }
 })
+
+// ============= ADMIN RESERVATION ROUTES =============
+
+// Get all reservations (admin only)
+app.get('/api/admin/reservations', verifyAdmin, async (req, res) => {
+  let connection;
+  try {
+    connection = await oracledb.getConnection();
+
+    const result = await connection.execute(
+      `SELECT r.reservation_id,
+              r.customer_id,
+              c.first_name || ' ' || c.last_name AS customer_name,
+              c.email AS customer_email,
+              r.vehicle_id,
+              v.make,
+              v.model,
+              v.registration_no,
+              r.start_date,
+              r.end_date,
+              r.status,
+              pb.branch_name AS pickup_branch,
+              db.branch_name AS dropoff_branch
+         FROM reservation r
+         JOIN customer c ON r.customer_id = c.customer_id
+         JOIN vehicle v ON r.vehicle_id = v.vehicle_id
+         JOIN branch pb ON r.pickup_branch_id = pb.branch_id
+         JOIN branch db ON r.dropoff_branch_id = db.branch_id
+        ORDER BY r.reservation_id DESC`
+    );
+
+    const reservations = result.rows.map(row => ({
+      reservation_id: row[0],
+      customer_id: row[1],
+      customer_name: row[2],
+      customer_email: row[3],
+      vehicle_id: row[4],
+      make: row[5],
+      model: row[6],
+      registration_no: row[7],
+      start_date: row[8],
+      end_date: row[9],
+      status: row[10],
+      pickup_branch: row[11],
+      dropoff_branch: row[12]
+    }));
+
+    res.json(reservations);
+  } catch (err) {
+    console.error('Error fetching reservations:', err);
+    res.status(500).json({ error: 'Failed to fetch reservations', details: err.message });
+  } finally {
+    if (connection) await connection.close();
+  }
+});
+
+// Update reservation status (admin only)
+app.put('/api/admin/reservations/:id', verifyAdmin, async (req, res) => {
+  let connection;
+  try {
+    const reservationId = Number(req.params.id);
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({ error: 'Status is required' });
+    }
+
+    connection = await oracledb.getConnection();
+
+    await connection.execute(
+      `UPDATE reservation SET status = :status WHERE reservation_id = :id`,
+      { status, id: reservationId },
+      { autoCommit: true }
+    );
+
+    res.json({ message: 'Reservation status updated' });
+  } catch (err) {
+    console.error('Error updating reservation:', err);
+    res.status(500).json({ error: 'Failed to update reservation', details: err.message });
+  } finally {
+    if (connection) await connection.close();
+  }
+});

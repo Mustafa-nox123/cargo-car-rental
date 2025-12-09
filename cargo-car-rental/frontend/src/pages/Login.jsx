@@ -58,7 +58,7 @@ export default function Login(){
   }
 
   return (
-    <div style={{minHeight: '70vh', display:'flex', alignItems:'center', justifyContent:'center', padding:'1rem', background:'#f8fafc'}}>
+    <div style={{minHeight: '70vh', display:'flex', alignItems:'center', justifyContent:'center', padding:'1rem', backgroundImage:'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url("/1.png")', backgroundSize:'cover', backgroundPosition:'center'}}>
       <div style={{width:'100%', maxWidth: '480px'}}>
         <div style={{background:'#fff', boxShadow:'0 6px 18px rgba(15,23,42,0.08)', borderRadius:12, overflow:'hidden'}}>
           <div style={{padding:'1.25rem'}}>
