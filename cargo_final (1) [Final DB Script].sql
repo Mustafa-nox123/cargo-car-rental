@@ -1,0 +1,692 @@
+--------------------------------------------------------
+--  File created - Wednesday-December-10-2025   
+--------------------------------------------------------
+--------------------------------------------------------
+--  DDL for Table ADMINS
+--------------------------------------------------------
+
+  CREATE TABLE "ADMINS" 
+   (	"ADMIN_ID" NUMBER GENERATED ALWAYS AS IDENTITY MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE , 
+	"FIRST_NAME" VARCHAR2(50 BYTE), 
+	"LAST_NAME" VARCHAR2(50 BYTE), 
+	"EMAIL" VARCHAR2(100 BYTE), 
+	"PASSWORD_HASH" VARCHAR2(200 BYTE), 
+	"ROLE" VARCHAR2(20 BYTE) DEFAULT 'MANAGER', 
+	"CREATED_AT" DATE DEFAULT SYSDATE
+   ) SEGMENT CREATION IMMEDIATE 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Table BRANCH
+--------------------------------------------------------
+
+  CREATE TABLE "BRANCH" 
+   (	"BRANCH_ID" NUMBER GENERATED ALWAYS AS IDENTITY MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE , 
+	"BRANCH_NAME" VARCHAR2(100 BYTE), 
+	"ADDRESS_LINE" VARCHAR2(200 BYTE), 
+	"CITY" VARCHAR2(100 BYTE), 
+	"PHONE_NO" VARCHAR2(30 BYTE)
+   ) SEGMENT CREATION IMMEDIATE 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Table CUSTOMER
+--------------------------------------------------------
+
+  CREATE TABLE "CUSTOMER" 
+   (	"CUSTOMER_ID" NUMBER GENERATED ALWAYS AS IDENTITY MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE , 
+	"FIRST_NAME" VARCHAR2(50 BYTE), 
+	"LAST_NAME" VARCHAR2(50 BYTE), 
+	"EMAIL" VARCHAR2(100 BYTE), 
+	"PHONE_NO" VARCHAR2(30 BYTE), 
+	"LICENSE_NO" VARCHAR2(50 BYTE), 
+	"NATIONAL_ID" VARCHAR2(50 BYTE), 
+	"PASSWORD" VARCHAR2(200 BYTE), 
+	"ADDRESS" VARCHAR2(200 BYTE), 
+	"LICENSE_EXPIRY" DATE
+   ) SEGMENT CREATION IMMEDIATE 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Table MAINTENANCE
+--------------------------------------------------------
+
+  CREATE TABLE "MAINTENANCE" 
+   (	"MAINTENANCE_ID" NUMBER GENERATED ALWAYS AS IDENTITY MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE , 
+	"VEHICLE_ID" NUMBER, 
+	"START_DATE" DATE, 
+	"END_DATE" DATE, 
+	"DESCRIPTION" VARCHAR2(200 BYTE), 
+	"COST" NUMBER(10,2)
+   ) SEGMENT CREATION DEFERRED 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Table PAYMENT
+--------------------------------------------------------
+
+  CREATE TABLE "PAYMENT" 
+   (	"PAYMENT_ID" NUMBER GENERATED ALWAYS AS IDENTITY MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE , 
+	"RENTAL_ID" NUMBER, 
+	"PAYMENT_DATE" DATE DEFAULT SYSDATE, 
+	"AMOUNT" NUMBER(10,2), 
+	"METHOD" VARCHAR2(20 BYTE), 
+	"REMARKS" VARCHAR2(200 BYTE)
+   ) SEGMENT CREATION DEFERRED 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Table RENTAL
+--------------------------------------------------------
+
+  CREATE TABLE "RENTAL" 
+   (	"RENTAL_ID" NUMBER GENERATED ALWAYS AS IDENTITY MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE , 
+	"RESERVATION_ID" NUMBER, 
+	"CUSTOMER_ID" NUMBER, 
+	"VEHICLE_ID" NUMBER, 
+	"PICKUP_DATETIME" DATE, 
+	"DROPOFF_DATETIME" DATE, 
+	"PICKUP_BRANCH_ID" NUMBER, 
+	"DROPOFF_BRANCH_ID" NUMBER, 
+	"TOTAL_AMOUNT" NUMBER(10,2), 
+	"STATUS" VARCHAR2(20 BYTE) DEFAULT 'OPEN'
+   ) SEGMENT CREATION DEFERRED 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Table RESERVATION
+--------------------------------------------------------
+
+  CREATE TABLE "RESERVATION" 
+   (	"RESERVATION_ID" NUMBER GENERATED ALWAYS AS IDENTITY MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE , 
+	"CUSTOMER_ID" NUMBER, 
+	"VEHICLE_ID" NUMBER, 
+	"PICKUP_BRANCH_ID" NUMBER, 
+	"DROPOFF_BRANCH_ID" NUMBER, 
+	"START_DATE" DATE, 
+	"END_DATE" DATE, 
+	"STATUS" VARCHAR2(20 BYTE) DEFAULT 'BOOKED'
+   ) SEGMENT CREATION IMMEDIATE 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Table VEHICLE
+--------------------------------------------------------
+
+  CREATE TABLE "VEHICLE" 
+   (	"VEHICLE_ID" NUMBER GENERATED ALWAYS AS IDENTITY MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE , 
+	"REGISTRATION_NO" VARCHAR2(50 BYTE), 
+	"MAKE" VARCHAR2(50 BYTE), 
+	"MODEL" VARCHAR2(50 BYTE), 
+	"YEAR_MADE" NUMBER(4,0), 
+	"CURRENT_MILEAGE" NUMBER, 
+	"STATUS" VARCHAR2(20 BYTE) DEFAULT 'AVAILABLE', 
+	"BRANCH_ID" NUMBER, 
+	"VEHICLE_TYPE_ID" NUMBER, 
+	"IMAGE_URL" VARCHAR2(500 BYTE)
+   ) SEGMENT CREATION IMMEDIATE 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Table VEHICLE_TYPE
+--------------------------------------------------------
+
+  CREATE TABLE "VEHICLE_TYPE" 
+   (	"VEHICLE_TYPE_ID" NUMBER GENERATED ALWAYS AS IDENTITY MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE , 
+	"TYPE_NAME" VARCHAR2(50 BYTE), 
+	"DAILY_RATE" NUMBER(10,2), 
+	"DESCRIPTION" VARCHAR2(200 BYTE)
+   ) SEGMENT CREATION IMMEDIATE 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+REM INSERTING into ADMINS
+SET DEFINE OFF;
+Insert into ADMINS (ADMIN_ID,FIRST_NAME,LAST_NAME,EMAIL,PASSWORD_HASH,ROLE,CREATED_AT) values (1,'Admin','Admin','admin@cargo.com','$2a$10$xKC4UpixI9O/tcQ9xBEsYuYqJ8KtzOrKuMzg2ceZ/kytOqC5J3p9C','Manager',to_date('09-DEC-25','DD-MON-RR'));
+REM INSERTING into BRANCH
+SET DEFINE OFF;
+Insert into BRANCH (BRANCH_ID,BRANCH_NAME,ADDRESS_LINE,CITY,PHONE_NO) values (1,'A','Gulshan-E-Iqbal','Karachi','0321-4322900');
+Insert into BRANCH (BRANCH_ID,BRANCH_NAME,ADDRESS_LINE,CITY,PHONE_NO) values (2,'B','D.H.A','Karachi','0345-9822098');
+REM INSERTING into CUSTOMER
+SET DEFINE OFF;
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE_NO,LICENSE_NO,NATIONAL_ID,PASSWORD,ADDRESS,LICENSE_EXPIRY) values (2,'Abdul Moid','Ghori','abdulmoid@example.com','03001234567','LX1234567','42101-1234567-8','$2a$10$k1md/QjyrxWuF1o9S5gEIefwH1YyeR9CwDkF6hUlYUBbKgIcFoAWS','Gulshan-e-Iqbal, Karachi',to_date('31-DEC-26','DD-MON-RR'));
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE_NO,LICENSE_NO,NATIONAL_ID,PASSWORD,ADDRESS,LICENSE_EXPIRY) values (1,'Ali','Khan','ali@example.com','03001234567','LIC-1001','42201-1234567-1','$2a$10$1XRlTg0sPAO1rPvbehiAueHNKnosvLAooaaizLVv473IqMrHD9UvC','Karachi',to_date('31-DEC-26','DD-MON-RR'));
+Insert into CUSTOMER (CUSTOMER_ID,FIRST_NAME,LAST_NAME,EMAIL,PHONE_NO,LICENSE_NO,NATIONAL_ID,PASSWORD,ADDRESS,LICENSE_EXPIRY) values (3,'Rayyan','Jan','rayyan@example.com','03076898998','LCSNWNCC123','42101-1294629-0','$2a$10$1iMxrFgCA6j04b9gbBDaVeoP4tMWLhMIyqnhEknJvZmd6s/jakveO','GULSHAN',null);
+REM INSERTING into MAINTENANCE
+SET DEFINE OFF;
+REM INSERTING into PAYMENT
+SET DEFINE OFF;
+REM INSERTING into RENTAL
+SET DEFINE OFF;
+REM INSERTING into RESERVATION
+SET DEFINE OFF;
+Insert into RESERVATION (RESERVATION_ID,CUSTOMER_ID,VEHICLE_ID,PICKUP_BRANCH_ID,DROPOFF_BRANCH_ID,START_DATE,END_DATE,STATUS) values (1,2,2,1,1,to_date('09-DEC-25','DD-MON-RR'),to_date('15-DEC-25','DD-MON-RR'),'BOOKED');
+REM INSERTING into VEHICLE
+SET DEFINE OFF;
+Insert into VEHICLE (VEHICLE_ID,REGISTRATION_NO,MAKE,MODEL,YEAR_MADE,CURRENT_MILEAGE,STATUS,BRANCH_ID,VEHICLE_TYPE_ID,IMAGE_URL) values (2,'ABC-123','Toyota','Corolla',2020,null,'AVAILABLE',1,2,null);
+Insert into VEHICLE (VEHICLE_ID,REGISTRATION_NO,MAKE,MODEL,YEAR_MADE,CURRENT_MILEAGE,STATUS,BRANCH_ID,VEHICLE_TYPE_ID,IMAGE_URL) values (3,'BG-3978','Honda','Vezel',2014,null,'AVAILABLE',1,3,null);
+Insert into VEHICLE (VEHICLE_ID,REGISTRATION_NO,MAKE,MODEL,YEAR_MADE,CURRENT_MILEAGE,STATUS,BRANCH_ID,VEHICLE_TYPE_ID,IMAGE_URL) values (4,'AXG-903','Suzuki ','Alto',2012,null,'AVAILABLE',1,1,null);
+Insert into VEHICLE (VEHICLE_ID,REGISTRATION_NO,MAKE,MODEL,YEAR_MADE,CURRENT_MILEAGE,STATUS,BRANCH_ID,VEHICLE_TYPE_ID,IMAGE_URL) values (5,'BG-8765','Toyota','Land Cruiser',2018,null,'AVAILABLE',2,4,null);
+Insert into VEHICLE (VEHICLE_ID,REGISTRATION_NO,MAKE,MODEL,YEAR_MADE,CURRENT_MILEAGE,STATUS,BRANCH_ID,VEHICLE_TYPE_ID,IMAGE_URL) values (6,'BGG-999','Honda','Civic',2016,null,'AVAILABLE',2,2,null);
+REM INSERTING into VEHICLE_TYPE
+SET DEFINE OFF;
+Insert into VEHICLE_TYPE (VEHICLE_TYPE_ID,TYPE_NAME,DAILY_RATE,DESCRIPTION) values (1,'Hatchback',3000,null);
+Insert into VEHICLE_TYPE (VEHICLE_TYPE_ID,TYPE_NAME,DAILY_RATE,DESCRIPTION) values (2,'Sedan',7000,null);
+Insert into VEHICLE_TYPE (VEHICLE_TYPE_ID,TYPE_NAME,DAILY_RATE,DESCRIPTION) values (3,'Crossover SUV',10000,null);
+Insert into VEHICLE_TYPE (VEHICLE_TYPE_ID,TYPE_NAME,DAILY_RATE,DESCRIPTION) values (4,'SUV',15000,null);
+--------------------------------------------------------
+--  DDL for Trigger TRG_MAINT_AI
+--------------------------------------------------------
+
+  CREATE OR REPLACE EDITIONABLE TRIGGER "TRG_MAINT_AI" 
+AFTER INSERT ON maintenance
+FOR EACH ROW
+BEGIN
+  UPDATE vehicle
+     SET status = 'MAINTENANCE'
+   WHERE vehicle_id = :NEW.vehicle_id
+     AND status <> 'RENTED';  -- don't override active rental
+END;
+
+
+/
+ALTER TRIGGER "TRG_MAINT_AI" ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger TRG_MAINT_AU
+--------------------------------------------------------
+
+  CREATE OR REPLACE EDITIONABLE TRIGGER "TRG_MAINT_AU" 
+AFTER UPDATE OF end_date ON maintenance
+FOR EACH ROW
+  WHEN (OLD.end_date IS NULL AND NEW.end_date IS NOT NULL) BEGIN
+  UPDATE vehicle
+     SET status = 'AVAILABLE'
+   WHERE vehicle_id = :NEW.vehicle_id
+     AND status = 'MAINTENANCE';
+END;
+
+
+/
+ALTER TRIGGER "TRG_MAINT_AU" ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger TRG_RENTAL_AI
+--------------------------------------------------------
+
+  CREATE OR REPLACE EDITIONABLE TRIGGER "TRG_RENTAL_AI" 
+AFTER INSERT ON rental
+FOR EACH ROW
+BEGIN
+  UPDATE vehicle
+     SET status = 'RENTED'
+   WHERE vehicle_id = :NEW.vehicle_id;
+
+  IF :NEW.reservation_id IS NOT NULL THEN
+    UPDATE reservation
+       SET status = 'CONVERTED'
+     WHERE reservation_id = :NEW.reservation_id;
+  END IF;
+END;
+
+
+/
+ALTER TRIGGER "TRG_RENTAL_AI" ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger TRG_RENTAL_AU_CLOSE
+--------------------------------------------------------
+
+  CREATE OR REPLACE EDITIONABLE TRIGGER "TRG_RENTAL_AU_CLOSE" 
+AFTER UPDATE OF status, dropoff_datetime, dropoff_branch_id ON rental
+FOR EACH ROW
+  WHEN (NEW.status = 'CLOSED' AND NVL(OLD.status,'X') <> 'CLOSED') BEGIN
+  UPDATE vehicle
+     SET status    = 'AVAILABLE',
+         branch_id = NVL(:NEW.dropoff_branch_id, branch_id)
+   WHERE vehicle_id = :NEW.vehicle_id;
+END;
+
+
+/
+ALTER TRIGGER "TRG_RENTAL_AU_CLOSE" ENABLE;
+--------------------------------------------------------
+--  DDL for Trigger TRG_RENTAL_BI
+--------------------------------------------------------
+
+  CREATE OR REPLACE EDITIONABLE TRIGGER "TRG_RENTAL_BI" 
+BEFORE INSERT ON rental
+FOR EACH ROW
+DECLARE
+  v_status  VARCHAR2(20);
+  v_cust    NUMBER;
+  v_veh     NUMBER;
+  v_pu_br   NUMBER;
+  v_do_br   NUMBER;
+  v_veh_status VARCHAR2(20);
+BEGIN
+  IF :NEW.reservation_id IS NOT NULL THEN
+    SELECT customer_id, vehicle_id, pickup_branch_id, dropoff_branch_id, status
+      INTO v_cust, v_veh, v_pu_br, v_do_br, v_status
+      FROM reservation
+     WHERE reservation_id = :NEW.reservation_id;
+
+    IF v_status <> 'BOOKED' THEN
+      RAISE_APPLICATION_ERROR(-20040, 'Reservation is not BOOKED.');
+    END IF;
+
+    -- Fill defaults from reservation if missing
+    :NEW.customer_id       := NVL(:NEW.customer_id, v_cust);
+    :NEW.vehicle_id        := NVL(:NEW.vehicle_id, v_veh);
+    :NEW.pickup_branch_id  := NVL(:NEW.pickup_branch_id, v_pu_br);
+    :NEW.dropoff_branch_id := NVL(:NEW.dropoff_branch_id, v_do_br);
+  END IF;
+
+  -- Ensure vehicle is AVAILABLE at start
+  SELECT status INTO v_veh_status FROM vehicle WHERE vehicle_id = :NEW.vehicle_id;
+  IF v_veh_status <> 'AVAILABLE' THEN
+    RAISE_APPLICATION_ERROR(-20041, 'Vehicle is not AVAILABLE.');
+  END IF;
+
+  IF :NEW.pickup_datetime IS NULL THEN
+    :NEW.pickup_datetime := SYSDATE;
+  END IF;
+
+  IF :NEW.status IS NULL THEN
+    :NEW.status := 'OPEN';
+  END IF;
+END;
+
+
+/
+ALTER TRIGGER "TRG_RENTAL_BI" ENABLE;
+--------------------------------------------------------
+--  DDL for Procedure CLOSE_RENTAL
+--------------------------------------------------------
+set define off;
+
+  CREATE OR REPLACE EDITIONABLE PROCEDURE "CLOSE_RENTAL" 
+(
+  p_rental_id         IN  NUMBER,
+  p_dropoff_branch_id IN  NUMBER,
+  p_dropoff_dt        IN  DATE DEFAULT SYSDATE,
+  p_total             OUT NUMBER
+)
+IS
+  v_vehicle   NUMBER;
+  v_status    VARCHAR2(20);
+BEGIN
+  -- Lock the rental row
+  SELECT vehicle_id, status
+    INTO v_vehicle, v_status
+    FROM rental
+   WHERE rental_id = p_rental_id
+   FOR UPDATE;
+
+  IF v_status = 'CLOSED' THEN
+    RAISE_APPLICATION_ERROR(-20020, 'Rental already CLOSED.');
+  END IF;
+
+  -- Compute total
+  p_total := compute_rental_amount(p_rental_id, p_dropoff_dt);
+
+  -- Update rental
+  UPDATE rental
+     SET dropoff_datetime  = p_dropoff_dt,
+         dropoff_branch_id = p_dropoff_branch_id,
+         total_amount      = p_total,
+         status            = 'CLOSED'
+   WHERE rental_id = p_rental_id;
+
+  -- Vehicle: move to drop-off branch + AVAILABLE
+  UPDATE vehicle
+     SET status    = 'AVAILABLE',
+         branch_id = NVL(p_dropoff_branch_id, branch_id)
+   WHERE vehicle_id = v_vehicle;
+
+  COMMIT;
+END;
+
+
+/
+--------------------------------------------------------
+--  DDL for Procedure MAKE_PAYMENT
+--------------------------------------------------------
+set define off;
+
+  CREATE OR REPLACE EDITIONABLE PROCEDURE "MAKE_PAYMENT" 
+(
+  p_rental_id IN NUMBER,
+  p_amount    IN NUMBER,
+  p_method    IN VARCHAR2 DEFAULT 'CASH',
+  p_remarks   IN VARCHAR2 DEFAULT NULL
+)
+IS
+  v_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO v_exists FROM rental WHERE rental_id = p_rental_id;
+  IF v_exists = 0 THEN
+    RAISE_APPLICATION_ERROR(-20030, 'Rental not found.');
+  END IF;
+
+  INSERT INTO payment (rental_id, amount, method, remarks)
+  VALUES (p_rental_id, p_amount, p_method, p_remarks);
+
+  COMMIT;
+END;
+
+
+/
+--------------------------------------------------------
+--  DDL for Procedure START_RENTAL
+--------------------------------------------------------
+set define off;
+
+  CREATE OR REPLACE EDITIONABLE PROCEDURE "START_RENTAL" 
+(
+  p_reservation_id IN  NUMBER,
+  p_pickup_dt      IN  DATE DEFAULT SYSDATE,
+  p_rental_id      OUT NUMBER
+)
+IS
+  v_cust     NUMBER;
+  v_veh      NUMBER;
+  v_pu_br    NUMBER;
+  v_do_br    NUMBER;
+  v_status   VARCHAR2(20);
+  v_veh_status VARCHAR2(20);
+BEGIN
+  -- Load reservation
+  SELECT customer_id, vehicle_id, pickup_branch_id, dropoff_branch_id, status
+    INTO v_cust, v_veh, v_pu_br, v_do_br, v_status
+    FROM reservation
+   WHERE reservation_id = p_reservation_id;
+
+  IF v_status <> 'BOOKED' THEN
+    RAISE_APPLICATION_ERROR(-20010, 'Reservation is not BOOKED.');
+  END IF;
+
+  -- Ensure vehicle available
+  SELECT status INTO v_veh_status
+    FROM vehicle WHERE vehicle_id = v_veh FOR UPDATE;
+  IF v_veh_status <> 'AVAILABLE' THEN
+    RAISE_APPLICATION_ERROR(-20011, 'Vehicle is not AVAILABLE.');
+  END IF;
+
+  -- Insert rental row
+  INSERT INTO rental
+    (reservation_id, customer_id, vehicle_id, pickup_datetime,
+     pickup_branch_id, dropoff_branch_id, status)
+  VALUES
+    (p_reservation_id, v_cust, v_veh, p_pickup_dt,
+     v_pu_br, v_do_br, 'OPEN')
+  RETURNING rental_id INTO p_rental_id;
+
+  -- Flip statuses
+  UPDATE vehicle
+     SET status = 'RENTED'
+   WHERE vehicle_id = v_veh;
+
+  UPDATE reservation
+     SET status = 'CONVERTED'
+   WHERE reservation_id = p_reservation_id;
+
+  COMMIT;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    RAISE_APPLICATION_ERROR(-20012, 'Reservation not found.');
+END;
+
+
+/
+--------------------------------------------------------
+--  DDL for Function CALC_BILLABLE_DAYS
+--------------------------------------------------------
+
+  CREATE OR REPLACE EDITIONABLE FUNCTION "CALC_BILLABLE_DAYS" (p_start IN DATE, p_end IN DATE)
+RETURN NUMBER
+IS
+  v_days NUMBER;
+BEGIN
+  IF p_start IS NULL OR p_end IS NULL THEN
+    RAISE_APPLICATION_ERROR(-20001, 'Start and end date/time required.');
+  END IF;
+  IF p_end < p_start THEN
+    RAISE_APPLICATION_ERROR(-20002, 'End cannot be earlier than start.');
+  END IF;
+  v_days := GREATEST(1, CEIL(p_end - p_start)); -- Oracle DATE difference = days (fractional)
+  RETURN v_days;
+END;
+
+
+/
+--------------------------------------------------------
+--  DDL for Function COMPUTE_RENTAL_AMOUNT
+--------------------------------------------------------
+
+  CREATE OR REPLACE EDITIONABLE FUNCTION "COMPUTE_RENTAL_AMOUNT" (p_rental_id IN NUMBER, p_dropoff_dt IN DATE)
+RETURN NUMBER
+IS
+  v_pickup    DATE;
+  v_vehicle   NUMBER;
+  v_rate      NUMBER(10,2);
+  v_days      NUMBER;
+  v_amount    NUMBER(10,2);
+BEGIN
+  SELECT pickup_datetime, vehicle_id
+    INTO v_pickup, v_vehicle
+    FROM rental
+   WHERE rental_id = p_rental_id;
+
+  SELECT vt.daily_rate
+    INTO v_rate
+    FROM vehicle v
+    JOIN vehicle_type vt ON vt.vehicle_type_id = v.vehicle_type_id
+   WHERE v.vehicle_id = v_vehicle;
+
+  v_days   := calc_billable_days(v_pickup, p_dropoff_dt);
+  v_amount := v_rate * v_days;
+  RETURN v_amount;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    RAISE_APPLICATION_ERROR(-20003, 'Rental or Vehicle not found for compute.');
+END;
+
+
+/
+--------------------------------------------------------
+--  Constraints for Table BRANCH
+--------------------------------------------------------
+
+  ALTER TABLE "BRANCH" MODIFY ("BRANCH_ID" NOT NULL ENABLE);
+  ALTER TABLE "BRANCH" MODIFY ("BRANCH_NAME" NOT NULL ENABLE);
+  ALTER TABLE "BRANCH" ADD PRIMARY KEY ("BRANCH_ID")
+  USING INDEX PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  ENABLE;
+--------------------------------------------------------
+--  Constraints for Table RESERVATION
+--------------------------------------------------------
+
+  ALTER TABLE "RESERVATION" MODIFY ("RESERVATION_ID" NOT NULL ENABLE);
+  ALTER TABLE "RESERVATION" MODIFY ("CUSTOMER_ID" NOT NULL ENABLE);
+  ALTER TABLE "RESERVATION" MODIFY ("VEHICLE_ID" NOT NULL ENABLE);
+  ALTER TABLE "RESERVATION" MODIFY ("PICKUP_BRANCH_ID" NOT NULL ENABLE);
+  ALTER TABLE "RESERVATION" MODIFY ("DROPOFF_BRANCH_ID" NOT NULL ENABLE);
+  ALTER TABLE "RESERVATION" MODIFY ("START_DATE" NOT NULL ENABLE);
+  ALTER TABLE "RESERVATION" MODIFY ("END_DATE" NOT NULL ENABLE);
+  ALTER TABLE "RESERVATION" ADD CONSTRAINT "CHK_RES_DATES" CHECK (start_date < end_date) ENABLE;
+  ALTER TABLE "RESERVATION" ADD PRIMARY KEY ("RESERVATION_ID")
+  USING INDEX PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  ENABLE;
+--------------------------------------------------------
+--  Constraints for Table VEHICLE
+--------------------------------------------------------
+
+  ALTER TABLE "VEHICLE" MODIFY ("VEHICLE_ID" NOT NULL ENABLE);
+  ALTER TABLE "VEHICLE" MODIFY ("REGISTRATION_NO" NOT NULL ENABLE);
+  ALTER TABLE "VEHICLE" MODIFY ("BRANCH_ID" NOT NULL ENABLE);
+  ALTER TABLE "VEHICLE" MODIFY ("VEHICLE_TYPE_ID" NOT NULL ENABLE);
+  ALTER TABLE "VEHICLE" ADD PRIMARY KEY ("VEHICLE_ID")
+  USING INDEX PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  ENABLE;
+  ALTER TABLE "VEHICLE" ADD UNIQUE ("REGISTRATION_NO")
+  USING INDEX PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  ENABLE;
+--------------------------------------------------------
+--  Constraints for Table RENTAL
+--------------------------------------------------------
+
+  ALTER TABLE "RENTAL" MODIFY ("RENTAL_ID" NOT NULL ENABLE);
+  ALTER TABLE "RENTAL" MODIFY ("CUSTOMER_ID" NOT NULL ENABLE);
+  ALTER TABLE "RENTAL" MODIFY ("VEHICLE_ID" NOT NULL ENABLE);
+  ALTER TABLE "RENTAL" MODIFY ("PICKUP_DATETIME" NOT NULL ENABLE);
+  ALTER TABLE "RENTAL" MODIFY ("PICKUP_BRANCH_ID" NOT NULL ENABLE);
+  ALTER TABLE "RENTAL" ADD PRIMARY KEY ("RENTAL_ID")
+  USING INDEX PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS"  ENABLE;
+--------------------------------------------------------
+--  Constraints for Table MAINTENANCE
+--------------------------------------------------------
+
+  ALTER TABLE "MAINTENANCE" MODIFY ("MAINTENANCE_ID" NOT NULL ENABLE);
+  ALTER TABLE "MAINTENANCE" MODIFY ("VEHICLE_ID" NOT NULL ENABLE);
+  ALTER TABLE "MAINTENANCE" MODIFY ("START_DATE" NOT NULL ENABLE);
+  ALTER TABLE "MAINTENANCE" ADD PRIMARY KEY ("MAINTENANCE_ID")
+  USING INDEX PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS"  ENABLE;
+--------------------------------------------------------
+--  Constraints for Table CUSTOMER
+--------------------------------------------------------
+
+  ALTER TABLE "CUSTOMER" MODIFY ("CUSTOMER_ID" NOT NULL ENABLE);
+  ALTER TABLE "CUSTOMER" MODIFY ("FIRST_NAME" NOT NULL ENABLE);
+  ALTER TABLE "CUSTOMER" ADD PRIMARY KEY ("CUSTOMER_ID")
+  USING INDEX PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  ENABLE;
+--------------------------------------------------------
+--  Constraints for Table VEHICLE_TYPE
+--------------------------------------------------------
+
+  ALTER TABLE "VEHICLE_TYPE" MODIFY ("VEHICLE_TYPE_ID" NOT NULL ENABLE);
+  ALTER TABLE "VEHICLE_TYPE" MODIFY ("TYPE_NAME" NOT NULL ENABLE);
+  ALTER TABLE "VEHICLE_TYPE" MODIFY ("DAILY_RATE" NOT NULL ENABLE);
+  ALTER TABLE "VEHICLE_TYPE" ADD PRIMARY KEY ("VEHICLE_TYPE_ID")
+  USING INDEX PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  ENABLE;
+--------------------------------------------------------
+--  Constraints for Table ADMINS
+--------------------------------------------------------
+
+  ALTER TABLE "ADMINS" MODIFY ("ADMIN_ID" NOT NULL ENABLE);
+  ALTER TABLE "ADMINS" MODIFY ("FIRST_NAME" NOT NULL ENABLE);
+  ALTER TABLE "ADMINS" MODIFY ("EMAIL" NOT NULL ENABLE);
+  ALTER TABLE "ADMINS" MODIFY ("PASSWORD_HASH" NOT NULL ENABLE);
+  ALTER TABLE "ADMINS" ADD PRIMARY KEY ("ADMIN_ID")
+  USING INDEX PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  ENABLE;
+  ALTER TABLE "ADMINS" ADD UNIQUE ("EMAIL")
+  USING INDEX PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  ENABLE;
+--------------------------------------------------------
+--  Constraints for Table PAYMENT
+--------------------------------------------------------
+
+  ALTER TABLE "PAYMENT" MODIFY ("PAYMENT_ID" NOT NULL ENABLE);
+  ALTER TABLE "PAYMENT" MODIFY ("RENTAL_ID" NOT NULL ENABLE);
+  ALTER TABLE "PAYMENT" MODIFY ("AMOUNT" NOT NULL ENABLE);
+  ALTER TABLE "PAYMENT" ADD PRIMARY KEY ("PAYMENT_ID")
+  USING INDEX PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS"  ENABLE;
+--------------------------------------------------------
+--  Ref Constraints for Table MAINTENANCE
+--------------------------------------------------------
+
+  ALTER TABLE "MAINTENANCE" ADD CONSTRAINT "FK_MAINT_VEHICLE" FOREIGN KEY ("VEHICLE_ID")
+	  REFERENCES "VEHICLE" ("VEHICLE_ID") ENABLE;
+--------------------------------------------------------
+--  Ref Constraints for Table PAYMENT
+--------------------------------------------------------
+
+  ALTER TABLE "PAYMENT" ADD CONSTRAINT "FK_PAYMENT_RENTAL" FOREIGN KEY ("RENTAL_ID")
+	  REFERENCES "RENTAL" ("RENTAL_ID") ENABLE;
+--------------------------------------------------------
+--  Ref Constraints for Table RENTAL
+--------------------------------------------------------
+
+  ALTER TABLE "RENTAL" ADD CONSTRAINT "FK_RENTAL_RES" FOREIGN KEY ("RESERVATION_ID")
+	  REFERENCES "RESERVATION" ("RESERVATION_ID") ENABLE;
+  ALTER TABLE "RENTAL" ADD CONSTRAINT "FK_RENTAL_CUSTOMER" FOREIGN KEY ("CUSTOMER_ID")
+	  REFERENCES "CUSTOMER" ("CUSTOMER_ID") ENABLE;
+  ALTER TABLE "RENTAL" ADD CONSTRAINT "FK_RENTAL_VEHICLE" FOREIGN KEY ("VEHICLE_ID")
+	  REFERENCES "VEHICLE" ("VEHICLE_ID") ENABLE;
+  ALTER TABLE "RENTAL" ADD CONSTRAINT "FK_RENTAL_PICKUP_BRANCH" FOREIGN KEY ("PICKUP_BRANCH_ID")
+	  REFERENCES "BRANCH" ("BRANCH_ID") ENABLE;
+  ALTER TABLE "RENTAL" ADD CONSTRAINT "FK_RENTAL_DROPOFF_BRANCH" FOREIGN KEY ("DROPOFF_BRANCH_ID")
+	  REFERENCES "BRANCH" ("BRANCH_ID") ENABLE;
+--------------------------------------------------------
+--  Ref Constraints for Table RESERVATION
+--------------------------------------------------------
+
+  ALTER TABLE "RESERVATION" ADD CONSTRAINT "FK_RES_CUSTOMER" FOREIGN KEY ("CUSTOMER_ID")
+	  REFERENCES "CUSTOMER" ("CUSTOMER_ID") ENABLE;
+  ALTER TABLE "RESERVATION" ADD CONSTRAINT "FK_RES_VEHICLE" FOREIGN KEY ("VEHICLE_ID")
+	  REFERENCES "VEHICLE" ("VEHICLE_ID") ENABLE;
+  ALTER TABLE "RESERVATION" ADD CONSTRAINT "FK_RES_PICKUP_BRANCH" FOREIGN KEY ("PICKUP_BRANCH_ID")
+	  REFERENCES "BRANCH" ("BRANCH_ID") ENABLE;
+  ALTER TABLE "RESERVATION" ADD CONSTRAINT "FK_RES_DROPOFF_BRANCH" FOREIGN KEY ("DROPOFF_BRANCH_ID")
+	  REFERENCES "BRANCH" ("BRANCH_ID") ENABLE;
+--------------------------------------------------------
+--  Ref Constraints for Table VEHICLE
+--------------------------------------------------------
+
+  ALTER TABLE "VEHICLE" ADD CONSTRAINT "FK_VEHICLE_BRANCH" FOREIGN KEY ("BRANCH_ID")
+	  REFERENCES "BRANCH" ("BRANCH_ID") ENABLE;
+  ALTER TABLE "VEHICLE" ADD CONSTRAINT "FK_VEHICLE_VTYPE" FOREIGN KEY ("VEHICLE_TYPE_ID")
+	  REFERENCES "VEHICLE_TYPE" ("VEHICLE_TYPE_ID") ENABLE;
